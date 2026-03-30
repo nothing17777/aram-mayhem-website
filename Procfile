@@ -1,1 +1,1 @@
-web: gunicorn loltracker.wsgi
+web: gunicorn loltracker.wsgi:application
