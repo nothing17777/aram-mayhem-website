@@ -1,0 +1,420 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto px-4 py-12">
+
+    <!-- Match Info Header -->
+    <div class="bg-[#1c1c22] rounded-2xl border border-[#2e2e36] p-8 mb-8 shadow-xl">
+        <div class="flex justify-between items-center">
+            <div>
+                <h1 class="text-3xl font-bold text-white">Match Scoreboard</h1>
+                <p class="text-gray-400 mt-1">
+                    {% if info.queueId == 420 %}Ranked Solo/Duo
+                    {% elif info.queueId == 430 %}Normal Draft
+                    {% elif info.queueId == 450 %}ARAM
+                    {% elif info.queueId == 1700 %}Arena
+                    {% else %}Normal{% endif %} · {{ info.formatted_duration }}
+                </p>
+            </div>
+            <a href="javascript:history.back()"
+                class="px-6 py-2 bg-[#2a2a32] hover:bg-[#34343e] text-white rounded-lg font-medium transition-colors border border-[#3e3e46]">
+                ← Back
+            </a>
+        </div>
+    </div>
+
+    <!-- Teams -->
+    <div class="space-y-8">
+
+        {% for team_id in "12" %}
+        {% if team_id == "1" %}
+        <div
+            class="bg-[#1c1c22] rounded-2xl border {% if blue_win %}border-blue-500/40{% else %}border-[#2e2e36]{% endif %} overflow-hidden shadow-lg">
+            <div
+                class="{% if blue_win %}bg-blue-900/20{% else %}bg-[#18181e]{% endif %} px-6 py-3 border-b border-[#2e2e36] flex items-center gap-3">
+                <span class="text-blue-400 font-bold uppercase text-sm tracking-widest">Blue Team</span>
+                {% if blue_win %}
+                <span
+                    class="px-2 py-0.5 bg-blue-500 text-white text-[10px] font-black rounded uppercase tracking-wider">Victory</span>
+                {% else %}
+                <span
+                    class="px-2 py-0.5 bg-gray-700/80 text-gray-400 text-[10px] font-black rounded uppercase tracking-wider">Defeat</span>
+                {% endif %}
+            </div>
+            {% else %}
+            <div
+                class="bg-[#1c1c22] rounded-2xl border {% if red_win %}border-red-500/40{% else %}border-[#2e2e36]{% endif %} overflow-hidden shadow-lg">
+                <div
+                    class="{% if red_win %}bg-red-900/20{% else %}bg-[#18181e]{% endif %} px-6 py-3 border-b border-[#2e2e36] flex items-center gap-3">
+                    <span class="text-red-400 font-bold uppercase text-sm tracking-widest">Red Team</span>
+                    {% if red_win %}
+                    <span
+                        class="px-2 py-0.5 bg-red-500 text-white text-[10px] font-black rounded uppercase tracking-wider">Victory</span>
+                    {% else %}
+                    <span
+                        class="px-2 py-0.5 bg-gray-700/80 text-gray-400 text-[10px] font-black rounded uppercase tracking-wider">Defeat</span>
+                    {% endif %}
+                </div>
+                {% endif %}
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm">
+                        <thead class="text-[10px] text-gray-500 uppercase font-bold border-b border-[#2e2e36]">
+                            <tr>
+                                <th class="px-5 py-3 w-72">Player</th>
+                                <th class="px-5 py-3">KDA</th>
+                                <th class="px-5 py-3">Damage</th>
+                                <th class="px-5 py-3">Tanked</th>
+                                <th class="px-5 py-3">CS</th>
+                                <th class="px-5 py-3">Gold</th>
+                                <th class="px-5 py-3">Items</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for p in participants %}
+                            {% if team_id == "1" and p.teamId == 100 or team_id == "2" and p.teamId == 200 %}
+
+                            <!-- Clickable player row -->
+                            <tr class="border-b border-[#2e2e36] hover:bg-[#22222c] transition-colors cursor-pointer select-none"
+                                onclick="document.getElementById('detail-{{ p.participantId }}').classList.toggle('hidden')">
+                                <!-- Player column: expanded to prevent compression -->
+                                <td class="px-5 py-3 min-w-[420px]">
+                                    <div class="flex items-center gap-4">
+                                        <!-- Carry Score & MVP -->
+                                        <div class="flex-shrink-0 flex flex-col items-center justify-center p-1 w-12 min-h-[44px] bg-black/40 border {% if p.performance_score >= 8 %}border-yellow-500/30 shadow-[0_0_15px_rgba(234,179,8,0.15)]{% else %}border-white/5{% endif %} rounded-lg overflow-hidden">
+                                            {% if p.puuid == match.mvp_puuid %}
+                                            <div class="text-[8px] font-black text-yellow-500 uppercase tracking-widest leading-none mb-1">MVP</div>
+                                            {% else %}
+                                            <div class="text-[8px] font-black text-gray-500 uppercase tracking-widest leading-none mb-1">Score</div>
+                                            {% endif %}
+                                            <div class="text-xs font-black {% if p.performance_score >= 8 %}text-yellow-400 drop-shadow-[0_0_8px_rgba(234,179,8,0.4)]{% elif p.performance_score >= 6 %}text-blue-400{% else %}text-gray-400{% endif %}">
+                                                {{ p.performance_score }}
+                                            </div>
+                                        </div>
+
+                                        <!-- Champion & Spells Group -->
+                                        <div class="flex gap-2 items-center flex-shrink-0">
+                                            <div class="w-12 h-12 rounded-lg border border-[#2e2e36] overflow-hidden shadow-sm">
+                                                <img src="https://ddragon.leagueoflegends.com/cdn/{{ version }}/img/champion/{{ p.championName }}.png"
+                                                    alt="{{ p.championName }}" class="w-full h-full object-cover">
+                                            </div>
+                                            <!-- Summoner spells -->
+                                            <div class="flex flex-col gap-0.5 flex-shrink-0">
+                                                <img src="https://ddragon.leagueoflegends.com/cdn/{{ version }}/img/spell/{{ p.spell1_img }}.png"
+                                                    class="w-5 h-5 rounded border border-[#2e2e36]" title="{{ p.spell1_img }}">
+                                                <img src="https://ddragon.leagueoflegends.com/cdn/{{ version }}/img/spell/{{ p.spell2_img }}.png"
+                                                    class="w-5 h-5 rounded border border-[#2e2e36]" title="{{ p.spell2_img }}">
+                                            </div>
+                                            <!-- Rune: keystone + secondary style -->
+                                            <div class="flex flex-col gap-0.5 items-center flex-shrink-0">
+                                                {% if p.keystone_img %}
+                                                <img src="https://ddragon.leagueoflegends.com/cdn/img/{{ p.keystone_img }}"
+                                                    class="w-5 h-5 rounded-full border border-[#2e2e36] bg-black" title="Keystone">
+                                                {% else %}
+                                                <img src="https://ddragon.leagueoflegends.com/cdn/img/perk-images/Styles/{{ p.primary_style }}.png"
+                                                    class="w-5 h-5 rounded-full border border-[#2e2e36] bg-black">
+                                                {% endif %}
+                                                <img src="https://ddragon.leagueoflegends.com/cdn/img/perk-images/Styles/{{ p.sub_style }}.png"
+                                                    class="w-3.5 h-3.5 rounded-full opacity-60">
+                                            </div>
+                                        </div>
+                                        <!-- Name & Rank -->
+                                        <div class="min-w-0 flex-1">
+                                            <div class="font-bold text-white text-sm truncate" title="{{ p.riotIdGameName }}#{{ p.riotIdTagline }}">
+                                                {{ p.riotIdGameName }}#{{ p.riotIdTagline }}
+                                            </div>
+                                            <div class="text-[10px] text-gray-500 flex flex-wrap items-center gap-x-1.5 whitespace-nowrap mt-0.5">
+                                                <span class="text-gray-400 capitalize">{{ p.championName }}</span>
+                                                <span class="opacity-30">|</span>
+                                                <span class="{% if p.tier != 'Unranked' %}text-blue-400 font-bold{% else %}text-gray-600{% endif %}">
+                                                    {{ p.tier }} {{ p.rank|default:"" }}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <!-- KDA: given generous padding -->
+                                <td class="px-8 py-3 min-w-[140px]">
+                                    <div class="font-bold text-white">{{ p.kills }} / <span class="text-red-400">
+                                            {{ p.deaths }}</span> / {{ p.assists }}</div>
+                                    <div class="text-[10px] text-gray-500 mt-0.5">
+                                        {% if p.deaths == 0 %}Perfect{% else %}{{ p.challenges.kda|floatformat:2 }} KDA
+                                        {% endif %}
+                                    </div>
+                                </td>
+
+                                <!-- Damage -->
+                                <td class="px-5 py-3">
+                                    <div class="font-mono text-gray-200 text-xs">{{ p.totalDamageDealtToChampions }}
+                                    </div>
+                                    <div class="w-24 h-1.5 bg-gray-800 rounded-full mt-1 overflow-hidden">
+                                        <div class="{% if p.teamId == 100 %}bg-blue-500{% else %}bg-red-500{% endif %} h-full rounded-full opacity-80"
+                                            style="width: {% widthratio p.totalDamageDealtToChampions max_dmg 100 %}%">
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <!-- Tanked -->
+                                <td class="px-5 py-3">
+                                    <div class="font-mono text-gray-300 text-xs opacity-80">{{ p.totalDamageTaken }}
+                                    </div>
+                                    <div class="w-24 h-1.5 bg-gray-800/50 rounded-full mt-1 overflow-hidden">
+                                        <div class="bg-gray-400 h-full rounded-full opacity-50"
+                                            style="width: {% widthratio p.totalDamageTaken max_tank 100 %}%">
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <!-- CS -->
+                                <td class="px-5 py-3 text-gray-300 font-mono text-xs">
+                                    {{ p.totalMinionsKilled|add:p.neutralMinionsKilled }}
+                                    <span class="text-gray-500 text-[10px]">({{ p.cs_per_min|floatformat:1 }})</span>
+                                </td>
+
+                                <!-- Gold -->
+                                <td class="px-5 py-3 text-yellow-400 font-mono text-xs font-bold">
+                                    {{ p.goldEarned }}
+                                </td>
+
+                                <!-- Items -->
+<td class="px-5 py-3">
+    <div class="flex gap-0.5 items-center">
+        <div class="w-6 h-6 rounded border border-[#2e2e36]">
+            <img src="https://ddragon.leagueoflegends.com/cdn/{{ version }}/img/item/{{ p.item0 }}.png"
+                class="w-6 h-6 rounded"
+                {% if p.item0 == 0 %}style="display:none"{% else %}onerror="this.style.display='none'"{% endif %}>
+        </div>
+        <div class="w-6 h-6 rounded border border-[#2e2e36]">
+            <img src="https://ddragon.leagueoflegends.com/cdn/{{ version }}/img/item/{{ p.item1 }}.png"
+                class="w-6 h-6 rounded"
+                {% if p.item1 == 0 %}style="display:none"{% else %}onerror="this.style.display='none'"{% endif %}>
+        </div>
+        <div class="w-6 h-6 rounded border border-[#2e2e36]">
+            <img src="https://ddragon.leagueoflegends.com/cdn/{{ version }}/img/item/{{ p.item2 }}.png"
+                class="w-6 h-6 rounded"
+                {% if p.item2 == 0 %}style="display:none"{% else %}onerror="this.style.display='none'"{% endif %}>
+        </div>
+        <div class="w-6 h-6 rounded border border-[#2e2e36]">
+            <img src="https://ddragon.leagueoflegends.com/cdn/{{ version }}/img/item/{{ p.item3 }}.png"
+                class="w-6 h-6 rounded"
+                {% if p.item3 == 0 %}style="display:none"{% else %}onerror="this.style.display='none'"{% endif %}>
+        </div>
+        <div class="w-6 h-6 rounded border border-[#2e2e36]">
+            <img src="https://ddragon.leagueoflegends.com/cdn/{{ version }}/img/item/{{ p.item4 }}.png"
+                class="w-6 h-6 rounded"
+                {% if p.item4 == 0 %}style="display:none"{% else %}onerror="this.style.display='none'"{% endif %}>
+        </div>
+        <div class="w-6 h-6 rounded border border-[#2e2e36]">
+            <img src="https://ddragon.leagueoflegends.com/cdn/{{ version }}/img/item/{{ p.item5 }}.png"
+                class="w-6 h-6 rounded"
+                {% if p.item5 == 0 %}style="display:none"{% else %}onerror="this.style.display='none'"{% endif %}>
+        </div>
+        <div class="w-6 h-6 rounded-full border border-gray-600 ml-1">
+            <img src="https://ddragon.leagueoflegends.com/cdn/{{ version }}/img/item/{{ p.item6 }}.png"
+                class="w-6 h-6 rounded-full"
+                {% if p.item6 == 0 %}style="display:none"{% else %}onerror="this.style.display='none'"{% endif %}>
+        </div>
+    </div>
+</td>
+
+                            <!-- Expandable detail panel -->
+                            <tr id="detail-{{ p.participantId }}" class="hidden bg-[#13131a] border-b border-[#2e2e36]">
+                                <td colspan="7" class="px-8 py-6">
+                                    <!-- Player Header & Action -->
+                                    <div class="flex justify-between items-center mb-6 pb-4 border-b border-[#2e2e36]/50">
+                                        <div class="flex items-center gap-3">
+                                            <h4 class="text-xl font-black text-white tracking-tight">{{ p.riotIdGameName }}<span class="text-gray-500 font-medium">#{{ p.tagLine|default:p.riotIdTagline }}</span></h4>
+                                            <span class="px-2 py-0.5 bg-[#1c1c22] border border-[#2e2e36] rounded text-[10px] font-bold text-gray-500 uppercase tracking-widest">Match Details</span>
+                                        </div>
+                                        <a href="{% url 'profile_view' summoner_name=p.riotIdGameName|add:'-'|add:p.riotIdTagline %}" 
+                                           class="px-6 py-2 bg-blue-600/10 hover:bg-blue-600 text-blue-400 hover:text-white rounded-xl text-xs font-black border border-blue-500/20 transition-all flex items-center gap-2 shadow-lg active:scale-95">
+                                           <span>VIEW PROFILE</span>
+                                           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                                        </a>
+                                    </div>
+
+                                    <div class="grid grid-cols-4 gap-6 text-sm">
+
+                                    <!-- Offense -->
+                                    <div>
+                                        <p class="text-[10px] font-black uppercase tracking-widest text-orange-400 mb-2">⚔ Offense</p>
+                                        <ul class="space-y-1.5 text-gray-300">
+                                            <li class="flex justify-between gap-4">
+                                                <span class="text-gray-500">Damage to Champs</span>
+                                                <span class="font-mono text-white">{{ p.totalDamageDealtToChampions }}</span>
+                                            </li>
+                                            <li class="flex justify-between gap-4">
+                                                <span class="text-gray-500">Total Damage Dealt</span>
+                                                <span class="font-mono text-gray-400">{{ p.totalDamageDealt }}</span>
+                                            </li>
+                                            <li class="flex justify-between gap-4">
+                                                <span class="text-gray-500">Physical Damage</span>
+                                                <span class="font-mono text-orange-300">{{ p.physicalDamageDealtToChampions }}</span>
+                                            </li>
+                                            <li class="flex justify-between gap-4">
+                                                <span class="text-gray-500">Magic Damage</span>
+                                                <span class="font-mono text-purple-300">{{ p.magicDamageDealtToChampions }}</span>
+                                            </li>
+                                            <li class="flex justify-between gap-4">
+                                                <span class="text-gray-500">True Damage</span>
+                                                <span class="font-mono text-gray-200">{{ p.trueDamageDealtToChampions }}</span>
+                                            </li>
+                                            <li class="flex justify-between gap-4">
+                                                <span class="text-gray-500">Largest Crit</span>
+                                                <span class="font-mono text-red-500">{{ p.largestCriticalStrike }}</span>
+                                            </li>
+                                        </ul>
+                                    </div>
+
+                                    <!-- Defense -->
+                                    <div>
+                                        <p class="text-[10px] font-black uppercase tracking-widest text-blue-400 mb-2">🛡 Defense</p>
+                                        <ul class="space-y-1.5 text-gray-300">
+                                            <li class="flex justify-between gap-4">
+                                                <span class="text-gray-500">Total Damage Taken</span>
+                                                <span class="font-mono text-white">{{ p.totalDamageTaken }}</span>
+                                            </li>
+                                            <li class="flex justify-between gap-4">
+                                                <span class="text-gray-500">Magic Taken</span>
+                                                <span class="font-mono text-purple-400">{{ p.magicDamageTaken }}</span>
+                                            </li>
+                                            <li class="flex justify-between gap-4">
+                                                <span class="text-gray-500">Physical Taken</span>
+                                                <span class="font-mono text-orange-400">{{ p.physicalDamageTaken }}</span>
+                                            </li>
+                                            <li class="flex justify-between gap-4">
+                                                <span class="text-gray-500">Self Mitigated</span>
+                                                <span class="font-mono text-blue-300">{{ p.damageSelfMitigated }}</span>
+                                            </li>
+                                            <li class="flex justify-between gap-4">
+                                                <span class="text-gray-500">Total Healing</span>
+                                                <span class="font-mono text-green-400">{{ p.totalHeal }}</span>
+                                            </li>
+                                            <li class="flex justify-between gap-4">
+                                                <span class="text-gray-500">Time Spent Dead</span>
+                                                <span class="font-mono text-gray-500">{{ p.totalTimeSpentDead }}s</span>
+                                            </li>
+                                        </ul>
+                                    </div>
+
+                                    <!-- Objectives -->
+                                    <div>
+                                        <p class="text-[10px] font-black uppercase tracking-widest text-emerald-400 mb-2">🚩 Objectives</p>
+                                        <ul class="space-y-1.5 text-gray-300">
+                                            <li class="flex justify-between gap-4">
+                                                <span class="text-gray-500">Turret Kills</span>
+                                                <span class="font-mono text-white">{{ p.turretKills }}</span>
+                                            </li>
+                                            <li class="flex justify-between gap-4">
+                                                <span class="text-gray-500">Inhibitors</span>
+                                                <span class="font-mono text-white">{{ p.inhibitorKills }}</span>
+                                            </li>
+                                            <li class="flex justify-between gap-4">
+                                                <span class="text-gray-500">Object. Damage</span>
+                                                <span class="font-mono text-gray-400">{{ p.damageDealtToObjectives }}</span>
+                                            </li>
+                                            <li class="flex justify-between gap-4">
+                                                <span class="text-gray-500">Vision Score</span>
+                                                <span class="font-mono text-emerald-300">{{ p.visionScore }}</span>
+                                            </li>
+                                            <li class="flex justify-between gap-4">
+                                                <span class="text-gray-500">Wards Placed</span>
+                                                <span class="font-mono text-white">{{ p.wardsPlaced }}</span>
+                                            </li>
+                                            <li class="flex justify-between gap-4">
+                                                <span class="text-gray-500">Control Wards</span>
+                                                <span class="font-mono text-pink-400">{{ p.visionWardsBoughtInGame }}</span>
+                                            </li>
+                                        </ul>
+                                    </div>
+
+                                    <!-- Combat Stats -->
+                                    <div>
+                                        <p class="text-[10px] font-black uppercase tracking-widest text-yellow-500 mb-2">🔥 Combat</p>
+                                        <ul class="space-y-1.5 text-gray-300">
+                                            <li class="flex justify-between gap-4">
+                                                <span class="text-gray-400 text-xs">Kill Streaks</span>
+                                                <span class="font-mono text-white">{{ p.largestKillingSpree }}</span>
+                                            </li>
+                                            <li class="flex justify-between gap-2 border-t border-gray-800/50 pt-1">
+                                                <span class="text-gray-500">Multi:</span>
+                                                <div class="flex gap-2 font-mono text-[10px]">
+                                                    <span class="{% if p.doubleKills > 0 %}text-white{% else %}text-gray-600{% endif %}" title="Double">2x: {{ p.doubleKills }}</span>
+                                                    <span class="{% if p.tripleKills > 0 %}text-yellow-400{% else %}text-gray-600{% endif %}" title="Triple">3x: {{ p.tripleKills }}</span>
+                                                    <span class="{% if p.pentaKills > 0 %}text-red-500 font-bold{% else %}text-gray-600{% endif %}" title="Penta">5x: {{ p.pentaKills }}</span>
+                                                </div>
+                                            </li>
+                                            <li class="flex justify-between gap-4">
+                                                <span class="text-gray-500">First Blood</span>
+                                                <span class="font-mono {% if p.firstBloodKill %}text-yellow-400{% else %}text-gray-600{% endif %}">{% if p.firstBloodKill %}Yes{% else %}No{% endif %}</span>
+                                            </li>
+                                            <li class="flex justify-between gap-4">
+                                                <span class="text-gray-500">CC Score</span>
+                                                <span class="font-mono text-white">{{ p.timeCCingOthers }}s</span>
+                                            </li>
+                                            <li class="flex justify-between gap-4">
+                                                <span class="text-gray-500">Gold Earned</span>
+                                                <span class="font-mono text-yellow-500">{{ p.goldEarned }}</span>
+                                            </li>
+                                            <li class="flex justify-between gap-4">
+                                                <span class="text-gray-500">Gold Spent</span>
+                                                <span class="font-mono text-orange-400">{{ p.goldSpent }}</span>
+                                            </li>
+                                        </ul>
+                                    </div>
+
+
+                                    </div>
+
+                                    <!-- Rune Tree -->
+                                    {% if p.rune_pages %}
+                                    <div class="mt-5 border-t border-[#2e2e36] pt-4">
+                                        <p class="text-[10px] font-black uppercase tracking-widest text-purple-400 mb-4 text-center">🔮 Runes</p>
+                                        <div class="flex gap-10 justify-center">
+                                            {% for page in p.rune_pages %}
+                                            <div class="flex flex-col items-center gap-2 min-w-[120px]">
+                                                <!-- Tree header -->
+                                                <div class="flex items-center gap-1.5 mb-1.5 grayscale opacity-70">
+                                                    <img src="https://ddragon.leagueoflegends.com/cdn/img/perk-images/Styles/{{ page.style_img }}.png"
+                                                        class="w-4 h-4 rounded-full">
+                                                    <span class="text-[9px] font-bold text-gray-400 uppercase tracking-widest">
+                                                        {% if forloop.first %}Primary{% else %}Secondary{% endif %}
+                                                    </span>
+                                                </div>
+                                                <!-- Rune selections -->
+                                                <div class="flex flex-col items-center gap-2.5">
+                                                    {% for sel in page.selections %}
+                                                    {% if sel.img %}
+                                                    <div class="relative group">
+                                                        <img src="https://ddragon.leagueoflegends.com/cdn/img/{{ sel.img }}"
+                                                            class="{% if forloop.first and forloop.parentloop.first %}w-11 h-11 border-yellow-500/50 p-0.5{% else %}w-7 h-7 border-white/5 p-1{% endif %} rounded-full border bg-white/5 hover:bg-white/10 transition-colors object-contain">
+                                                    </div>
+                                                    {% endif %}
+                                                    {% endfor %}
+                                                </div>
+                                            </div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                    {% endif %}
+
+                                </td>
+                            </tr>
+
+                            {% endif %}
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% endfor %}
+
+        </div>
+    </div>
+
+    <script>
+        // rows are toggled via inline onclick — no extra JS needed.
+        // But we keep this stub in case you want to extend it later.
+    </script>
+    {% endblock %}

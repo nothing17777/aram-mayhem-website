@@ -1,0 +1,84 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mayhem Atlas | ARAM Mayhem Strategy</title>
+  <!-- Integration point for Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {}
+      }
+    }
+  </script>
+  <link rel="icon" type="image/webp" href="{% static 'assets/Fat_Poro_Icon.webp' %}">
+  {% block extra_head %}{% endblock %}
+</head>
+
+<body class="min-h-screen bg-[#0a0a0c] text-slate-300 font-sans selection:bg-blue-500/30 flex flex-col">
+
+  <!-- Navbar -->
+  <nav class="fixed top-0 w-full z-50 bg-[#0a0a0c]/80 backdrop-blur-md border-b border-[#2e2e36]">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        <a href="{% url 'home' %}" class="flex items-center gap-4">
+          <div
+            class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-400 to-indigo-600 flex items-center justify-center text-white font-black text-2xl shadow-[0_0_20px_rgba(34,197,94,0.1)]">
+            M
+          </div>
+          <span
+            class="text-2xl font-black bg-clip-text text-transparent bg-gradient-to-r from-white via-gray-100 to-gray-400 tracking-tighter">
+            MAYHEM<span class="text-cyan-400/80 italic">ATLAS</span>
+          </span>
+        </a>
+
+        <div class="hidden md:block">
+          <form action="{% url 'search_summoner' %}" method="GET" class="relative group">
+            <div
+              class="absolute -inset-0.5 bg-gradient-to-r from-blue-500 to-cyan-400 rounded-lg blur opacity-20 group-hover:opacity-40 transition duration-300">
+            </div>
+            <div class="relative flex items-center bg-[#1c1c22] rounded-lg px-3 py-1.5 border border-[#2e2e36]">
+              <svg class="w-4 h-4 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+              </svg>
+              <input type="text" name="q" placeholder="Summoner#TAG"
+                class="bg-transparent border-none text-sm text-gray-200 focus:outline-none w-56 placeholder-gray-500" />
+              <div class="flex items-center ml-2 space-x-1">
+                <kbd
+                  class="px-1.5 py-0.5 text-xs text-gray-500 bg-[#2a2a32] rounded border border-[#3e3e46]">Enter</kbd>
+              </div>
+            </div>
+          </form>
+        </div>
+
+        <div class="flex space-x-6 text-sm font-medium text-gray-300">
+          <a href="#" class="hover:text-cyan-400 transition-colors">Mayhem Guide</a>
+          <a href="{% url 'home' %}" class="hover:text-cyan-400 transition-colors">Home</a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="flex-grow pt-16">
+    <!-- Integration point: React components can mount here or inside block content -->
+    <div id="react-root"></div>
+    {% block content %}
+    {% endblock %}
+  </div>
+
+  <!-- Footer -->
+  <footer class="py-12 mt-10 text-center border-t border-[#1a1a24] text-sm text-gray-500">
+    <p>LoL Tracker © 2026. Powered by Django.</p>
+  </footer>
+
+  <!-- React/JS inclusion block -->
+  {% block extra_scripts %}{% endblock %}
+
+</body>
+
+</html>
