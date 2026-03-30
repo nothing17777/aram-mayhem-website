@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: loltracker
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn loltracker.wsgi:application
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.14.3
+      - key: DEBUG
+        value: "False"
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DJANGO_SETTINGS_MODULE
+        value: loltracker.settings
