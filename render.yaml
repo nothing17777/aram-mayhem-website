@@ -11,5 +11,7 @@ services:
         value: "False"
       - key: SECRET_KEY
         generateValue: true
+      - key: ALLOWED_HOSTS
+        value: "aram-mayhem-website.onrender.com,.onrender.com"
       - key: DJANGO_SETTINGS_MODULE
         value: loltracker.settings

@@ -27,7 +27,7 @@ SECRET_KEY = os.environ.get("SECRET_KEY", "django-insecure-pw@=7$y7aw+6#d3dyd3g#
 # Riot API Key setup
 RIOT_API_KEY = os.environ.get("RIOT_API_KEY", "")
 DEBUG = os.environ.get("DEBUG", "True") == "True"
-ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "127.0.0.1,localhost,.render.com").split(",")
+ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "127.0.0.1,localhost,aram-mayhem-website.onrender.com,.onrender.com").split(",")
 
 # Application definition
 INSTALLED_APPS = [
